@@ -140,19 +140,19 @@ public class Rotate3DShapes extends GLCanvas
         gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best perspective correction
         gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out lighting
 
-//        gl.glEnable(GL2.GL_TEXTURE_2D);
-//        try
-//        {
-//
-//            for (int i = 0; i < textureImages.length; i++)
-//            {
-//                File im = new File(textureImages[i]);
-//                Texture t = TextureIO.newTexture(im, true);
-//                textures[i] = t.getTextureObject(gl);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        gl.glEnable(GL2.GL_TEXTURE_2D);
+        try
+        {
+
+            for (int i = 0; i < textureImages.length; i++)
+            {
+                File im = new File(textureImages[i]);
+                Texture t = TextureIO.newTexture(im, true);
+                textures[i] = t.getTextureObject(gl);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -195,15 +195,15 @@ public class Rotate3DShapes extends GLCanvas
 
         // ----- Render the Color Cube -----
         gl.glLoadIdentity();                // reset the current model-view matrix
-        gl.glTranslatef(0.0f, 0.0f, -5.0f); // translate right and into the screen
+        gl.glTranslatef(0.0f, 0.0f, -3.0f); // translate right and into the screen
         // gl.glRotatef(angleCube, 1.0f, 1.0f, 1.0f); // rotate about the x, y and z-axes
 
         gl.glRotatef(xrot, 1.0f, 1.0f, 1.0f);
         gl.glRotatef(yrot, 0.0f, 1.0f, 0.0f);
         gl.glRotatef(zrot, 0.0f, 0.0f, 1.0f);
 
-        int latitudeCount = 120; // széleségi körök száma
-        int meridianCount = 120; // hosszúsági körök száma
+        int latitudeCount = 36; // széleségi körök száma
+        int meridianCount = 36; // hosszúsági körök száma
 
         for (int l = 0; l < latitudeCount; l++) {
             for (int m = 0; m < meridianCount; m++)
@@ -220,14 +220,14 @@ public class Rotate3DShapes extends GLCanvas
                 gl.glBegin(GL_QUADS); // of the color cube
                 // gl.glColor3d(random.nextInt(256)/256f, random.nextInt(256)/256f, random.nextInt(256)/256f); // green
                 gl.glColor3d(0.5, (1.0d * l)/latitudeCount, (1.0d * m)/meridianCount); // green
-                //gl.glTexCoord2f(0.0f, 0.0f);
+                gl.glTexCoord2f(0.0f, 0.0f);
 
                 gl.glVertex3d(Math.sin(beta1) * Math.cos(alpha1), Math.sin(alpha1), Math.cos(beta1) * Math.cos(alpha1));
-                //gl.glTexCoord2f(1.0f, 0.0f);
+                gl.glTexCoord2f(1.0f, 0.0f);
                 gl.glVertex3d(Math.sin(beta2) * Math.cos(alpha1), Math.sin(alpha1), Math.cos(beta2) * Math.cos(alpha1));
-                //gl.glTexCoord2f(1.0f, 1.0f);
+                gl.glTexCoord2f(1.0f, 1.0f);
                 gl.glVertex3d(Math.sin(beta2) * Math.cos(alpha2), Math.sin(alpha2), Math.cos(beta2) * Math.cos(alpha2));
-                //gl.glTexCoord2f(0.0f, 1.0f);
+                gl.glTexCoord2f(0.0f, 1.0f);
                 gl.glVertex3d(Math.sin(beta1) * Math.cos(alpha2), Math.sin(alpha2), Math.cos(beta1) * Math.cos(alpha2));
                 gl.glEnd(); // of the color cube
 
@@ -239,9 +239,9 @@ public class Rotate3DShapes extends GLCanvas
         currentOpening += speedOpening;
 
         //change the speeds here
-        xrot = 0.2f;
-        yrot += 1.31f;
-        zrot = 0.3f;
+        xrot += 0.12f;
+        yrot += 0.31f;
+        zrot += 0.03f;
 
     }
 
