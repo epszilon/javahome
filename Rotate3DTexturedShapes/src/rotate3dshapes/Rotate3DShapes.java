@@ -30,14 +30,18 @@ public class Rotate3DShapes extends GLCanvas
    private static String TITLE = "Rotating 3D Shapes (GLCanvas)";  // window's title
    private static final int FPS = 60; // animator's target frames per second
    private float xrot,yrot,zrot;
+   private static String home = System.getProperty("user.home");
    private String[] textureImages = new String[] 
     { 
-        "c:\\Users\\Gyuri\\Documents\\NetBeansProjects\\javahome\\IMG_0475.JPG",
-        "c:\\Users\\Gyuri\\Documents\\NetBeansProjects\\javahome\\IMG_0652.JPG",
-        "c:\\Users\\Gyuri\\Documents\\NetBeansProjects\\javahome\\IMG_2719.JPG",
-        "c:\\Users\\Gyuri\\Documents\\NetBeansProjects\\javahome\\IMG_3544.JPG",
-        "c:\\Users\\Gyuri\\Documents\\NetBeansProjects\\javahome\\IMG_6354.JPG",
-        "c:\\Users\\Gyuri\\Documents\\NetBeansProjects\\javahome\\IMG_7060.JPG",
+       
+       
+       
+        home + "\\Documents\\NetBeansProjects\\javahome\\IMG_0475.JPG",
+        home + "\\Documents\\NetBeansProjects\\javahome\\IMG_0652.JPG",
+        home + "\\Documents\\NetBeansProjects\\javahome\\IMG_2719.JPG",
+        home + "\\Documents\\NetBeansProjects\\javahome\\IMG_3544.JPG",
+        home + "\\Documents\\NetBeansProjects\\javahome\\IMG_6354.JPG",
+        home + "\\Documents\\NetBeansProjects\\javahome\\IMG_7060.JPG",
 
     };
    
@@ -189,7 +193,7 @@ public class Rotate3DShapes extends GLCanvas
  
       // ----- Render the Color Cube -----
       gl.glLoadIdentity();                // reset the current model-view matrix
-      gl.glTranslatef(0.0f, 0.0f, -5.0f); // translate right and into the screen
+      gl.glTranslatef(0.0f, 0.0f, -15.0f); // translate right and into the screen
       // gl.glRotatef(angleCube, 1.0f, 1.0f, 1.0f); // rotate about the x, y and z-axes
  
       gl.glRotatef(xrot, 1.0f, 1.0f, 1.0f);
