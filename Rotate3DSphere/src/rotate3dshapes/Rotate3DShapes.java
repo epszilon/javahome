@@ -38,14 +38,7 @@ public class Rotate3DShapes extends GLCanvas
     
     private String[] textureImages = new String[]
     {
-
-        home + "\\Documents\\NetBeansProjects\\javahome\\IMG_0475.JPG",
-        home + "\\Documents\\NetBeansProjects\\javahome\\IMG_0652.JPG",
-        home + "\\Documents\\NetBeansProjects\\javahome\\IMG_2719.JPG",
-        home + "\\Documents\\NetBeansProjects\\javahome\\IMG_3544.JPG",
-        home + "\\Documents\\NetBeansProjects\\javahome\\IMG_6354.JPG",
-        home + "\\Documents\\NetBeansProjects\\javahome\\IMG_7060.JPG",
-
+        home + "\\Documents\\NetBeansProjects\\javahome\\WorldMap.png",
     };
 
     private int[] textures = new int[textureImages.length];
@@ -191,8 +184,6 @@ public class Rotate3DShapes extends GLCanvas
         GL2 gl = drawable.getGL().getGL2();  // get the OpenGL 2 graphics context
         gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color and depth buffers
 
-        float diff = (float) Math.abs(Math.sin(currentOpening));
-
         // ----- Render the Color Cube -----
         gl.glLoadIdentity();                // reset the current model-view matrix
         gl.glTranslatef(0.0f, 0.0f, -3.0f); // translate right and into the screen
@@ -202,35 +193,60 @@ public class Rotate3DShapes extends GLCanvas
         gl.glRotatef(yrot, 0.0f, 1.0f, 0.0f);
         gl.glRotatef(zrot, 0.0f, 0.0f, 1.0f);
 
-        int latitudeCount = 36; // széleségi körök száma
-        int meridianCount = 36; // hosszúsági körök száma
-
+        int SIZE = 120;
+        
+        int latitudeCount = SIZE; // széleségi körök száma
+        int meridianCount = 2*SIZE; // hosszúsági körök száma
+        
+        double tX = 1d;
+        double tY = 1d;
+        
+        double lDiff = 1d/latitudeCount;
+        double mDiff = 1d/meridianCount;
+        
         for (int l = 0; l < latitudeCount; l++) {
             for (int m = 0; m < meridianCount; m++)
             {
                 
-                double alpha1 = l * 2* Math.PI / latitudeCount;
-                double alpha2 = (l+1) *2  * Math.PI / latitudeCount;
+                double alpha1 = l * 1 * Math.PI / latitudeCount - Math.PI/2;
+                double alpha2 = (l+1) * 1  * Math.PI / latitudeCount - Math.PI/2;
                 
                 double beta1 = m * 2 * Math.PI / meridianCount;
                 double beta2 = (m+1) * 2 * Math.PI / meridianCount;
                 
-                
-                
                 gl.glBegin(GL_QUADS); // of the color cube
                 // gl.glColor3d(random.nextInt(256)/256f, random.nextInt(256)/256f, random.nextInt(256)/256f); // green
-                gl.glColor3d(0.5, (1.0d * l)/latitudeCount, (1.0d * m)/meridianCount); // green
-                gl.glTexCoord2f(0.0f, 0.0f);
-
+                // gl.glColor3d(0.5, (1.0d * l)/latitudeCount, (1.0d * m)/meridianCount); // green
+                gl.glTexCoord2d(m*mDiff*tX, l*lDiff*tY);
                 gl.glVertex3d(Math.sin(beta1) * Math.cos(alpha1), Math.sin(alpha1), Math.cos(beta1) * Math.cos(alpha1));
-                gl.glTexCoord2f(1.0f, 0.0f);
-                gl.glVertex3d(Math.sin(beta2) * Math.cos(alpha1), Math.sin(alpha1), Math.cos(beta2) * Math.cos(alpha1));
-                gl.glTexCoord2f(1.0f, 1.0f);
-                gl.glVertex3d(Math.sin(beta2) * Math.cos(alpha2), Math.sin(alpha2), Math.cos(beta2) * Math.cos(alpha2));
-                gl.glTexCoord2f(0.0f, 1.0f);
-                gl.glVertex3d(Math.sin(beta1) * Math.cos(alpha2), Math.sin(alpha2), Math.cos(beta1) * Math.cos(alpha2));
-                gl.glEnd(); // of the color cube
 
+                gl.glTexCoord2d((m+1)*mDiff*tX, l*lDiff*tY);
+                gl.glVertex3d(Math.sin(beta2) * Math.cos(alpha1), Math.sin(alpha1), Math.cos(beta2) * Math.cos(alpha1));
+
+                gl.glTexCoord2d((m+1)*mDiff*tX, (l+1)*lDiff*tY);
+                gl.glVertex3d(Math.sin(beta2) * Math.cos(alpha2), Math.sin(alpha2), Math.cos(beta2) * Math.cos(alpha2));
+
+                gl.glTexCoord2d(m*mDiff*tX, (l+1)*lDiff*tY);
+                gl.glVertex3d(Math.sin(beta1) * Math.cos(alpha2), Math.sin(alpha2), Math.cos(beta1) * Math.cos(alpha2));
+                gl.glEnd(); // of the color cube                
+                
+               
+//                gl.glBegin(GL_QUADS); // of the color cube
+//                // gl.glColor3d(random.nextInt(256)/256f, random.nextInt(256)/256f, random.nextInt(256)/256f); // green
+//                // gl.glColor3d(0.5, (1.0d * l)/latitudeCount, (1.0d * m)/meridianCount); // green
+//                gl.glTexCoord2f(0.0f, 0.0f);
+//                gl.glVertex3d(Math.sin(beta1) * Math.cos(alpha1), Math.sin(alpha1), Math.cos(beta1) * Math.cos(alpha1));
+//
+//                gl.glTexCoord2f(1.0f, 0.0f);
+//                gl.glVertex3d(Math.sin(beta2) * Math.cos(alpha1), Math.sin(alpha1), Math.cos(beta2) * Math.cos(alpha1));
+//
+//                gl.glTexCoord2f(1.0f, 1.0f);
+//                gl.glVertex3d(Math.sin(beta2) * Math.cos(alpha2), Math.sin(alpha2), Math.cos(beta2) * Math.cos(alpha2));
+//
+//                gl.glTexCoord2f(0.0f, 1.0f);
+//                gl.glVertex3d(Math.sin(beta1) * Math.cos(alpha2), Math.sin(alpha2), Math.cos(beta1) * Math.cos(alpha2));
+//                gl.glEnd(); // of the color cube
+                
             }
         }
 
@@ -289,5 +305,4 @@ public class Rotate3DShapes extends GLCanvas
     public void keyReleased(KeyEvent e)
     {
     }
-
 }
