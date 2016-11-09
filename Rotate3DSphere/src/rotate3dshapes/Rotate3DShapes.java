@@ -1,7 +1,4 @@
 // https://en.wikipedia.org/wiki/Equirectangular_projection#Reverse
-
-
-
 package rotate3dshapes;
 
 import java.awt.*;
@@ -29,7 +26,7 @@ import com.jogamp.opengl.util.texture.TextureIO;
  */
 @SuppressWarnings("serial")
 public class Rotate3DShapes extends GLCanvas
-        implements GLEventListener, KeyListener,  MouseListener, MouseMotionListener
+        implements GLEventListener, KeyListener, MouseListener, MouseMotionListener, MouseWheelListener
 {
     // Define constants for the top-level container
 
@@ -37,11 +34,15 @@ public class Rotate3DShapes extends GLCanvas
     private static final int FPS = 60; // animator's target frames per second
     private float xrot, yrot, zrot;
     private static String home = System.getProperty("user.home");
-    
+
     private java.util.Random random;
-    
-    private float mouseTestMove = 0.0f;
-    
+
+    private int mouseLastX = Integer.MIN_VALUE;
+    private int mouseLastY = Integer.MIN_VALUE;
+    private float positionDiffX = 0.0f;
+    private float positionDiffY = 0.0f;
+    private float positionDiffZ = -5.0f;
+
     private String[] textureImages = new String[]
     {
         home + "\\Documents\\NetBeansProjects\\javahome\\WorldMap.jpg",
@@ -117,9 +118,10 @@ public class Rotate3DShapes extends GLCanvas
     {
         random = new java.util.Random();
         this.addGLEventListener(this);
-        this.addKeyListener(this); // for Handling KeyEvents
-        this.addMouseListener(this); // for Handling KeyEvents
-        this.addMouseMotionListener(this); // for Handling KeyEvents
+        this.addKeyListener(this); // handling keyboard events
+        this.addMouseListener(this); // handling mouse events
+        this.addMouseMotionListener(this); // handling motion events
+        this.addMouseWheelListener(this);
         this.setFocusable(true);
         this.requestFocus();
     }
@@ -151,7 +153,8 @@ public class Rotate3DShapes extends GLCanvas
                 Texture t = TextureIO.newTexture(im, true);
                 textures[i] = t.getTextureObject(gl);
             }
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             e.printStackTrace();
         }
     }
@@ -194,61 +197,59 @@ public class Rotate3DShapes extends GLCanvas
 
         // ----- Render the Color Cube -----
         gl.glLoadIdentity();                // reset the current model-view matrix
-        gl.glTranslatef(0.0f, 0.0f, -5.0f - mouseTestMove); // translate right and into the screen
+        // gl.glTranslatef(0.0f, 0.0f, -5.0f - mouseTestMove); // translate right and into the screen
+        gl.glTranslatef(positionDiffX, positionDiffY, positionDiffZ); // translate right and into the screen
         // gl.glRotatef(angleCube, 1.0f, 1.0f, 1.0f); // rotate about the x, y and z-axes
 
         gl.glRotatef(30f, 1.0f, 0.0f, 0.0f);
         gl.glRotatef(-23.27f, 0.0f, 0.0f, 1.0f);
         gl.glRotatef(xrot, 0.0f, 1.0f, 0.0f);
-        
-        
+
 //        gl.glRotatef(xrot, 1.0f, 1.0f, 1.0f);
 //        gl.glRotatef(yrot, 0.0f, 1.0f, 0.0f);
 //        gl.glRotatef(zrot, 0.0f, 0.0f, 1.0f);
-
         int SIZE = 120;
-        
+
         int latitudeCount = SIZE; // széleségi körök száma
-        int meridianCount = 2*SIZE; // hosszúsági körök száma
-        
+        int meridianCount = 2 * SIZE; // hosszúsági körök száma
+
         double tX = 1d;
         double tY = 1d;
-        
-        double lDiff = 1d/latitudeCount;
-        double mDiff = 1d/meridianCount;
-        
-        for (int l = 0; l < latitudeCount; l++) {
+
+        double lDiff = 1d / latitudeCount;
+        double mDiff = 1d / meridianCount;
+
+        for (int l = 0; l < latitudeCount; l++)
+        {
             for (int m = 0; m < meridianCount; m++)
             {
-                
-                double alpha1 = l * 1 * Math.PI / latitudeCount - Math.PI/2;
-                double alpha2 = (l+1) * 1  * Math.PI / latitudeCount - Math.PI/2;
-                
+
+                double alpha1 = l * 1 * Math.PI / latitudeCount - Math.PI / 2;
+                double alpha2 = (l + 1) * 1 * Math.PI / latitudeCount - Math.PI / 2;
+
                 double beta1 = m * 2 * Math.PI / meridianCount;
-                double beta2 = (m+1) * 2 * Math.PI / meridianCount;
-                
+                double beta2 = (m + 1) * 2 * Math.PI / meridianCount;
+
                 gl.glBegin(GL_QUADS); // of the color cube
                 // gl.glColor3d(random.nextInt(256)/256f, random.nextInt(256)/256f, random.nextInt(256)/256f); // green
                 // gl.glColor3d(0.5, (1.0d * l)/latitudeCount, (1.0d * m)/meridianCount); // green
-                
+
 //                gl.glEnable (GL_BLEND); 
 //                gl.glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 //                gl.glColor4d(1.0d, 1.0d, 1.0d, 0.9d);
-
-                gl.glTexCoord2d(m*mDiff*tX, l*lDiff*tY);
+                gl.glTexCoord2d(m * mDiff * tX, l * lDiff * tY);
                 gl.glVertex3d(Math.sin(beta1) * Math.cos(alpha1), Math.sin(alpha1), Math.cos(beta1) * Math.cos(alpha1));
 
-                gl.glTexCoord2d((m+1)*mDiff*tX, l*lDiff*tY);
+                gl.glTexCoord2d((m + 1) * mDiff * tX, l * lDiff * tY);
                 gl.glVertex3d(Math.sin(beta2) * Math.cos(alpha1), Math.sin(alpha1), Math.cos(beta2) * Math.cos(alpha1));
 
-                gl.glTexCoord2d((m+1)*mDiff*tX, (l+1)*lDiff*tY);
+                gl.glTexCoord2d((m + 1) * mDiff * tX, (l + 1) * lDiff * tY);
                 gl.glVertex3d(Math.sin(beta2) * Math.cos(alpha2), Math.sin(alpha2), Math.cos(beta2) * Math.cos(alpha2));
 
-                gl.glTexCoord2d(m*mDiff*tX, (l+1)*lDiff*tY);
+                gl.glTexCoord2d(m * mDiff * tX, (l + 1) * lDiff * tY);
                 gl.glVertex3d(Math.sin(beta1) * Math.cos(alpha2), Math.sin(alpha2), Math.cos(beta1) * Math.cos(alpha2));
                 gl.glEnd(); // of the color cube                
-                
-               
+
 //                gl.glBegin(GL_QUADS); // of the color cube
 //                // gl.glColor3d(random.nextInt(256)/256f, random.nextInt(256)/256f, random.nextInt(256)/256f); // green
 //                // gl.glColor3d(0.5, (1.0d * l)/latitudeCount, (1.0d * m)/meridianCount); // green
@@ -264,7 +265,6 @@ public class Rotate3DShapes extends GLCanvas
 //                gl.glTexCoord2f(0.0f, 1.0f);
 //                gl.glVertex3d(Math.sin(beta1) * Math.cos(alpha2), Math.sin(alpha2), Math.cos(beta1) * Math.cos(alpha2));
 //                gl.glEnd(); // of the color cube
-                
             }
         }
 
@@ -323,42 +323,66 @@ public class Rotate3DShapes extends GLCanvas
     public void keyReleased(KeyEvent e)
     {
     }
-    
-// Mouse events
 
+// Mouse events
     // Do-nothing methods, but required nonetheless
     @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override    
-    public void mouseExited(MouseEvent e) {
+    public void mouseEntered(MouseEvent e)
+    {
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void mouseExited(MouseEvent e)
+    {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        if(e.getButton() == MouseEvent.BUTTON1) {
-            mouseTestMove += 0.3f;
-        } else if(e.getButton() == MouseEvent.BUTTON3) {
-            mouseTestMove -= 0.3f;
+    public void mousePressed(MouseEvent e)
+    {
+        if (e.getButton() == MouseEvent.BUTTON1)
+        {
+            mouseLastX = e.getX();
+            mouseLastY = e.getY();
         }
-        
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e)
+    {
+        if (e.getButton() == MouseEvent.BUTTON1)
+        {
+            mouseLastX = Integer.MIN_VALUE;
+            mouseLastY = Integer.MIN_VALUE;
+        }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e)
+    {
+
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e)
+    {
+        if (mouseLastX > Integer.MIN_VALUE)
+        {
+            positionDiffX += (-positionDiffZ) * (float) ((e.getX() - mouseLastX)) / this.size().width;
+            positionDiffY += (-1) * (-positionDiffZ) * (float) ((e.getY() - mouseLastY)) / this.size().height;
+            mouseLastX = e.getX();
+            mouseLastY = e.getY();
+        }
+
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e)
+    {
     }
     
-    @Override
-    public void mouseDragged(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent e) {
+    @Override 
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        positionDiffZ += e.getWheelRotation()/5.0f;
     }
     
 }
