@@ -155,7 +155,7 @@ public class LifeGame
         return space;
     }
 
-    private void displaySpace(String message)
+    public void displaySpace(String message)
     {
         if (display == DisplayType.Message || display == DisplayType.Full)
         {
@@ -189,7 +189,7 @@ public class LifeGame
         }
     }
 
-    private void saveSpace(String filePath)
+    public void saveSpace(String filePath)
     {
         BufferedWriter writer = null;
         try
@@ -402,48 +402,15 @@ public class LifeGame
 
         activeSizeMinX = Math.max(1, activeSizeMinX - 1);
         activeSizeMinY = Math.max(1, activeSizeMinY - 1);
-        activeSizeMaxX = Math.min(SizeX - 1, activeSizeMaxX + 1);
-        activeSizeMaxY = Math.min(SizeY - 1, activeSizeMaxY + 1);
+        activeSizeMaxX = Math.min(SizeX - 1, activeSizeMaxX + 2);
+        activeSizeMaxY = Math.min(SizeY - 1, activeSizeMaxY + 2);
 
         System.out.println("(" + activeSizeMinX + "," + activeSizeMinY + ") (" + activeSizeMaxX + "," + activeSizeMaxY + ")");
 
-        activeSizeMinX = 1;
-        activeSizeMinY = 1;
-        activeSizeMaxX = SizeX - 1;
-        activeSizeMaxY = SizeY - 1;
+//        activeSizeMinX = 1;
+//        activeSizeMinY = 1;
+//        activeSizeMaxX = SizeX - 1;
+//        activeSizeMaxY = SizeY - 1;
 
-    }
-
-    public static void main(String[] args)
-    {
-        try
-        {
-            LifeGame lifeGame = new LifeGame();
-            lifeGame.saveSpace("c:/temp/lifegame.txt");
-            // LifeGame lifeGame = new LifeGame("c:/temp/lifegame.txt");
-            // lifeGame.displaySpace("generation " + 0);
-
-            for (int i = 0; i < 1000; i++)
-            {
-                lifeGame.evaluate();
-                lifeGame.displaySpace("generation " + (i + 1));
-                System.out.println("generation:" + (i + 1) + " living:" + lifeGame.getLivingCount());
-                // if (lifeGame.isViable() == false)
-                if (lifeGame.isOversized() == true)
-                {
-                    System.out.println("This generation is oversized.");
-                    break;
-                }
-                if (lifeGame.isEmpty() == true)
-                {
-                    System.out.println("This generation is empty.");
-                    break;
-                }
-                // Thread.sleep(1000);
-            }
-        } catch (Exception exc)
-        {
-            System.out.println("Error:\n" + exc.getMessage());
-        }
     }
 }
