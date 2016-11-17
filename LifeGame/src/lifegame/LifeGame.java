@@ -1,6 +1,10 @@
 package lifegame;
 
-import java.awt.TrayIcon;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 
 enum SpaceType
 {
@@ -26,14 +30,14 @@ public class LifeGame
 
     static DisplayType display = DisplayType.Message;
 
-    int SizeX = 300;
-    int SizeY = 300;
-    
+    int SizeX = 1000;
+    int SizeY = 1000;
+
     int activeSizeMinX;
     int activeSizeMaxX;
     int activeSizeMinY;
     int activeSizeMaxY;
-    
+
     SpaceType[][] Space;
 
     public LifeGame()
@@ -42,6 +46,11 @@ public class LifeGame
         init();
     }
 
+    public LifeGame(String filePath)
+    {
+        readSpace(filePath);
+    }
+    
     private void init()
     {
         int centerX = SizeX / 2;
@@ -50,9 +59,21 @@ public class LifeGame
         java.util.Random random = new java.util.Random();
 
         int initRadius = 25;
-        for (int i = 0; i < (2 * initRadius * 2 * initRadius) / 2; i++)
+//        for (int i = 0; i < (2 * initRadius * 2 * initRadius) / 2; i++)
+//        {
+//            Space[centerX + random.nextInt(2 * initRadius) - initRadius][centerY + random.nextInt(2 * initRadius) - initRadius] = SpaceType.Live;
+//        }
+
+        for (int x = centerX - initRadius; x < centerX + initRadius; x++)
         {
-            Space[centerX + random.nextInt(2 * initRadius) - initRadius][centerY + random.nextInt(2 * initRadius) - initRadius] = SpaceType.Live;
+            for (int y = centerY - initRadius; y < centerY + initRadius; y++)
+            {
+                // Space[centerX + random.nextInt(2 * initRadius) - initRadius][centerY + random.nextInt(2 * initRadius) - initRadius] = SpaceType.Live;
+                if ((x + y) % 5 == 0 || (x - y) % 7 == 0 || x + y % 11 == 0 || x - y % 17 == 0 || x + y % 19 == 0 || x - y % 19 == 0)
+                {
+                    Space[centerX + random.nextInt(2 * initRadius) - initRadius][centerY + random.nextInt(2 * initRadius) - initRadius] = SpaceType.Live;
+                }
+            }
         }
 
 //        Space[centerX - 1][centerY] = SpaceType.Live;
@@ -168,6 +189,105 @@ public class LifeGame
         }
     }
 
+    private void saveSpace(String filePath)
+    {
+        BufferedWriter writer = null;
+        try
+        {
+            //create a temporary file
+            writer = new BufferedWriter(new FileWriter(new File(filePath)));
+            writer.write(SizeX + "," + SizeY);
+            writer.newLine();
+
+            for (int y = 0; y < SizeY; y++)
+            {
+                for (int x = 0; x < SizeX; x++)
+                {
+                    switch (Space[x][y])
+                    {
+                        case Empty:
+                            writer.write("O");
+                            break;
+                        case Live:
+                            writer.write("X");
+                            break;
+                        default:
+                            writer.write(" ");
+                    }
+                }
+                writer.newLine();
+            }
+            System.out.println();
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        } finally
+        {
+            try
+            {
+                if (writer != null)
+                {
+                    // Close the writer regardless of what happens...
+                    writer.close();
+                }
+            } catch (Exception e)
+            {
+            }
+        }
+
+    }
+
+    private void readSpace(String filePath)
+    {
+        BufferedReader reader = null;
+        try
+        {
+            //create a temporary file
+            reader = new BufferedReader(new FileReader(filePath));
+            String line = reader.readLine();
+            String[] dimensions = line.split(",");
+            this.SizeX = Integer.parseInt(dimensions[0]);
+            this.SizeY = Integer.parseInt(dimensions[1]);
+            this.Space = new SpaceType[SizeX][SizeY];
+
+            for (int y = 0; y < SizeY; y++)
+            {
+                line = reader.readLine();
+                for (int x = 0; x < SizeX; x++)
+                {
+                    char c = line.charAt(x);
+                    switch (c)
+                    {
+                        case 'O':
+                            Space[x][y] = SpaceType.Empty;
+                            break;
+                        case 'X':
+                            Space[x][y] = SpaceType.Live;
+                            break;
+                        default:
+                            throw new Exception("Unexpected char '" + c + "' found in the input file '" + filePath + "'!");
+
+                    }
+                }
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        } finally
+        {
+            try
+            {
+                if (reader != null)
+                {
+                    reader.close();
+                }
+            } catch (Exception e)
+            {
+            }
+        }
+
+    }
+
     private int getNeighborCount(int posX, int posY)
     {
         int neighborCount = 0;
@@ -194,9 +314,9 @@ public class LifeGame
 
     public void evaluate()
     {
-        for (int y = 1; y < SizeY - 1; y++)
+        for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
         {
-            for (int x = 1; x < SizeX - 1; x++)
+            for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
             {
                 int neighborCount = getNeighborCount(x, y);
                 // kihalók megkeresése
@@ -208,9 +328,9 @@ public class LifeGame
         }
         //DisplaySpace("kihatók megjelölve");
 
-        for (int y = 1; y < SizeY - 1; y++)
+        for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
         {
-            for (int x = 1; x < SizeX - 1; x++)
+            for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
             {
                 int neighborCount = getNeighborCount(x, y);
                 // szüleők megkeresése
@@ -222,9 +342,9 @@ public class LifeGame
         }
         //DisplaySpace("születettek megjelölése");
 
-        for (int y = 1; y < SizeY - 1; y++)
+        for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
         {
-            for (int x = 1; x < SizeX - 1; x++)
+            for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
             {
                 int neighborCount = getNeighborCount(x, y);
                 // kihalók kihalása
@@ -236,9 +356,9 @@ public class LifeGame
         }
         //DisplaySpace("kihalás");
 
-        for (int y = 1; y < SizeY - 1; y++)
+        for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
         {
-            for (int x = 1; x < SizeX - 1; x++)
+            for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
             {
                 int neighborCount = getNeighborCount(x, y);
                 // kihalók kihalása
@@ -250,37 +370,48 @@ public class LifeGame
         }
         //DisplaySpace("születés");
 
+        activeSizeMinX = SizeX;
+        activeSizeMinY = SizeY;
+        activeSizeMaxX = 0;
+        activeSizeMaxY = 0;
+
         // calculate the new active area
         for (int y = 1; y < SizeY - 1; y++)
         {
             for (int x = 1; x < SizeX - 1; x++)
             {
-                if(Space[x][y] == SpaceType.Live)
+                if (Space[x][y] == SpaceType.Live)
                 {
-                    if(activeSizeMinX > x)
+                    if (activeSizeMinX > x)
                     {
                         activeSizeMinX = x;
-                    }
-                    else if(activeSizeMaxX < x)
+                    } else if (activeSizeMaxX < x)
                     {
                         activeSizeMaxX = x;
                     }
-                    if(activeSizeMinY > y)
+                    if (activeSizeMinY > y)
                     {
                         activeSizeMinY = y;
-                    }
-                    else if(activeSizeMaxY < y)
+                    } else if (activeSizeMaxY < y)
                     {
                         activeSizeMaxY = y;
                     }
                 }
             }
         }
-        
-        activeSizeMinX = Math.max(0, activeSizeMinX - 1);
-        activeSizeMinY = Math.max(0, activeSizeMinY - 1);
-        activeSizeMaxX = Math.min(SizeX, activeSizeMaxX + 1);
-        activeSizeMaxY = Math.min(SizeY, activeSizeMaxY + 1);
+
+        activeSizeMinX = Math.max(1, activeSizeMinX - 1);
+        activeSizeMinY = Math.max(1, activeSizeMinY - 1);
+        activeSizeMaxX = Math.min(SizeX - 1, activeSizeMaxX + 1);
+        activeSizeMaxY = Math.min(SizeY - 1, activeSizeMaxY + 1);
+
+        System.out.println("(" + activeSizeMinX + "," + activeSizeMinY + ") (" + activeSizeMaxX + "," + activeSizeMaxY + ")");
+
+        activeSizeMinX = 1;
+        activeSizeMinY = 1;
+        activeSizeMaxX = SizeX - 1;
+        activeSizeMaxY = SizeY - 1;
+
     }
 
     public static void main(String[] args)
@@ -288,6 +419,8 @@ public class LifeGame
         try
         {
             LifeGame lifeGame = new LifeGame();
+            lifeGame.saveSpace("c:/temp/lifegame.txt");
+            // LifeGame lifeGame = new LifeGame("c:/temp/lifegame.txt");
             // lifeGame.displaySpace("generation " + 0);
 
             for (int i = 0; i < 1000; i++)
