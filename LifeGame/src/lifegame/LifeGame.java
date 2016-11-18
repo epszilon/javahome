@@ -28,7 +28,7 @@ enum DisplayType
 public class LifeGame
 {
 
-    static DisplayType display = DisplayType.Message;
+    static DisplayType display = DisplayType.No;
 
     int SizeX = 1000;
     int SizeY = 1000;
@@ -44,13 +44,15 @@ public class LifeGame
     {
         Space = CreateNewSpace();
         init();
+        calculateActualSize();
     }
 
     public LifeGame(String filePath)
     {
         readSpace(filePath);
+        calculateActualSize();
     }
-    
+
     private void init()
     {
         int centerX = SizeX / 2;
@@ -103,9 +105,9 @@ public class LifeGame
 
     public boolean isEmpty()
     {
-        for (int y = 0; y < SizeY; y++)
+        for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
         {
-            for (int x = 0; x < SizeX; x++)
+            for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
             {
                 if (Space[x][y] != SpaceType.Empty)
                 {
@@ -300,15 +302,26 @@ public class LifeGame
         {
             for (int x = posX - 1; x <= posX + 1; x++)
             {
-                if (x != posX || y != posY)
+//                if (x != posX || y != posY)
+//                {
+//                    if (Space[x][y] == SpaceType.Live || Space[x][y] == SpaceType.Dying)
+//                    {
+//                        neighborCount++;
+//                    }
+//                }
+
+                if (Space[x][y] == SpaceType.Live || Space[x][y] == SpaceType.Dying)
                 {
-                    if (Space[x][y] == SpaceType.Live || Space[x][y] == SpaceType.Dying)
-                    {
-                        neighborCount++;
-                    }
+                    neighborCount++;
                 }
             }
         }
+
+        if (Space[posX][posY] == SpaceType.Live || Space[posX][posY] == SpaceType.Dying)
+        {
+            neighborCount--;
+        }
+
         return neighborCount;
     }
 
@@ -319,61 +332,81 @@ public class LifeGame
             for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
             {
                 int neighborCount = getNeighborCount(x, y);
+                SpaceType current = Space[x][y];
                 // kihalók megkeresése
-                if (Space[x][y] == SpaceType.Live && (neighborCount <= 1 || neighborCount >= 4))
+                // if (Space[x][y] == SpaceType.Live && (neighborCount <= 1 || neighborCount >= 4))
+                if (current == SpaceType.Live && (neighborCount <= 1 || neighborCount >= 4))
                 {
                     Space[x][y] = SpaceType.Dying;
-                }
-            }
-        }
-        //DisplaySpace("kihatók megjelölve");
-
-        for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
-        {
-            for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
-            {
-                int neighborCount = getNeighborCount(x, y);
-                // szüleők megkeresése
-                if (Space[x][y] == SpaceType.Empty && neighborCount == 3)
+                } else if (current == SpaceType.Empty && neighborCount == 3)
                 {
                     Space[x][y] = SpaceType.Born;
                 }
             }
         }
-        //DisplaySpace("születettek megjelölése");
+        //DisplaySpace("kihatók megjelölve");
 
+//        for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
+//        {
+//            for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
+//            {
+//                int neighborCount = getNeighborCount(x, y);
+//                // szüleők megkeresése
+//                if (Space[x][y] == SpaceType.Empty && neighborCount == 3)
+//                {
+//                    Space[x][y] = SpaceType.Born;
+//                }
+//            }
+//        }
+        //DisplaySpace("születettek megjelölése");
         for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
         {
             for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
             {
-                int neighborCount = getNeighborCount(x, y);
+                // int neighborCount = getNeighborCount(x, y);
                 // kihalók kihalása
-                if (Space[x][y] == SpaceType.Dying)
+                SpaceType current = Space[x][y];
+                if (current == SpaceType.Dying)
                 {
                     Space[x][y] = SpaceType.Empty;
                 }
+
+                if (current == SpaceType.Born)
+                {
+                    Space[x][y] = SpaceType.Live;
+                }
+
             }
         }
         //DisplaySpace("kihalás");
 
-        for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
-        {
-            for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
-            {
-                int neighborCount = getNeighborCount(x, y);
-                // kihalók kihalása
-                if (Space[x][y] == SpaceType.Born)
-                {
-                    Space[x][y] = SpaceType.Live;
-                }
-            }
-        }
+//        for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
+//        {
+//            for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
+//            {
+//                //int neighborCount = getNeighborCount(x, y);
+//                // kihalók kihalása
+//                if (Space[x][y] == SpaceType.Born)
+//                {
+//                    Space[x][y] = SpaceType.Live;
+//                }
+//            }
+//        }
         //DisplaySpace("születés");
+        calculateActualSize();
 
-        activeSizeMinX = SizeX;
-        activeSizeMinY = SizeY;
-        activeSizeMaxX = 0;
-        activeSizeMaxY = 0;
+//        activeSizeMinX = 1;
+//        activeSizeMinY = 1;
+//        activeSizeMaxX = SizeX - 1;
+//        activeSizeMaxY = SizeY - 1;
+    }
+
+    public void calculateActualSize()
+    {
+        activeSizeMinX = Math.max(1, activeSizeMinX - 1);
+        activeSizeMinY = Math.max(1, activeSizeMinY - 1);
+        activeSizeMaxX = Math.min(SizeX - 1, activeSizeMaxX + 1);
+        activeSizeMaxY = Math.min(SizeY - 1, activeSizeMaxY + 1);
 
         // calculate the new active area
         for (int y = 1; y < SizeY - 1; y++)
@@ -405,12 +438,12 @@ public class LifeGame
         activeSizeMaxX = Math.min(SizeX - 1, activeSizeMaxX + 2);
         activeSizeMaxY = Math.min(SizeY - 1, activeSizeMaxY + 2);
 
-        System.out.println("(" + activeSizeMinX + "," + activeSizeMinY + ") (" + activeSizeMaxX + "," + activeSizeMaxY + ")");
+        //System.out.println("(" + activeSizeMinX + "," + activeSizeMinY + ") (" + activeSizeMaxX + "," + activeSizeMaxY + ")");
 
 //        activeSizeMinX = 1;
 //        activeSizeMinY = 1;
 //        activeSizeMaxX = SizeX - 1;
 //        activeSizeMaxY = SizeY - 1;
-
     }
+
 }
