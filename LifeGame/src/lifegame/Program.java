@@ -19,7 +19,7 @@ public class Program
              LifeGame lifeGame = new LifeGame("c:/temp/lifegame.txt");
             // lifeGame.displaySpace("generation " + 0);
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 lifeGame.evaluate();
                 lifeGame.displaySpace("generation " + (i + 1));

@@ -37,13 +37,14 @@ public class LifeGame
     int activeSizeMaxX;
     int activeSizeMinY;
     int activeSizeMaxY;
+    public int livingCount = -1;
 
     SpaceType[][] Space;
 
     public LifeGame()
     {
         Space = CreateNewSpace();
-        init();
+        init(SizeX / 40, 2 * (SizeX / 40) * (SizeX / 40));
         calculateActualSize();
     }
 
@@ -53,50 +54,32 @@ public class LifeGame
         calculateActualSize();
     }
 
-    private void init()
+    private void init(int initRadius, int count)
     {
         int centerX = SizeX / 2;
         int centerY = SizeY / 2;
 
         java.util.Random random = new java.util.Random();
 
-        int initRadius = 25;
-//        for (int i = 0; i < (2 * initRadius * 2 * initRadius) / 2; i++)
-//        {
-//            Space[centerX + random.nextInt(2 * initRadius) - initRadius][centerY + random.nextInt(2 * initRadius) - initRadius] = SpaceType.Live;
-//        }
-
-        for (int x = centerX - initRadius; x < centerX + initRadius; x++)
+        for (int i = 0; i < (2 * initRadius * 2 * initRadius) / 2; i++)
         {
-            for (int y = centerY - initRadius; y < centerY + initRadius; y++)
-            {
-                // Space[centerX + random.nextInt(2 * initRadius) - initRadius][centerY + random.nextInt(2 * initRadius) - initRadius] = SpaceType.Live;
-                if ((x + y) % 5 == 0 || (x - y) % 7 == 0 || x + y % 11 == 0 || x - y % 17 == 0 || x + y % 19 == 0 || x - y % 19 == 0)
-                {
-                    Space[centerX + random.nextInt(2 * initRadius) - initRadius][centerY + random.nextInt(2 * initRadius) - initRadius] = SpaceType.Live;
-                }
-            }
+            Space[centerX + random.nextInt(2 * initRadius) - initRadius][centerY + random.nextInt(2 * initRadius) - initRadius] = SpaceType.Live;
         }
-
-//        Space[centerX - 1][centerY] = SpaceType.Live;
-//        Space[centerX][centerY] = SpaceType.Live;
-//        Space[centerX + 1][centerY] = SpaceType.Live;
-//
-//        Space[centerX - 2][centerY + 1] = SpaceType.Live;
-//        Space[centerX - 1][centerY + 1] = SpaceType.Live;
-//        Space[centerX][centerY + 1] = SpaceType.Live;
     }
 
     public int getLivingCount()
     {
-        int livingCount = 0;
-        for (int y = 0; y < SizeY; y++)
+        if (livingCount == -1)
         {
-            for (int x = 0; x < SizeX; x++)
+            livingCount = 0;
+            for (int y = 0; y < SizeY; y++)
             {
-                if (Space[x][y] == SpaceType.Live)
+                for (int x = 0; x < SizeX; x++)
                 {
-                    livingCount++;
+                    if (Space[x][y] == SpaceType.Live)
+                    {
+                        livingCount++;
+                    }
                 }
             }
         }
@@ -105,37 +88,44 @@ public class LifeGame
 
     public boolean isEmpty()
     {
-        for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
-        {
-            for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
-            {
-                if (Space[x][y] != SpaceType.Empty)
-                {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return getLivingCount() == 0;
+//        for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
+//        {
+//            for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
+//            {
+//                if (Space[x][y] != SpaceType.Empty)
+//                {
+//                    return false;
+//                }
+//            }
+//        }
+//        return true;
     }
 
     public boolean isOversized()
     {
-        for (int y = 0; y < SizeY; y++)
+        if (activeSizeMinX > 1 && activeSizeMinY > 1 && activeSizeMaxX < SizeX - 1 && activeSizeMaxY < SizeY - 1)
         {
-            if (Space[0][y] != SpaceType.Empty || Space[SizeX - 1][y] != SpaceType.Empty)
+            return false;
+        } else
+        {
+            for (int y = 0; y < SizeY; y++)
             {
-                return true;
+                if (Space[0][y] != SpaceType.Empty || Space[SizeX - 1][y] != SpaceType.Empty)
+                {
+                    return true;
+                }
             }
-        }
 
-        for (int x = 0; x < SizeX; x++)
-        {
-            if (Space[x][0] != SpaceType.Empty || Space[x][SizeY - 1] != SpaceType.Empty)
+            for (int x = 0; x < SizeX; x++)
             {
-                return true;
+                if (Space[x][0] != SpaceType.Empty || Space[x][SizeY - 1] != SpaceType.Empty)
+                {
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
     }
 
     public boolean isViable()
@@ -154,6 +144,12 @@ public class LifeGame
                 space[x][y] = SpaceType.Empty;
             }
         }
+        
+        activeSizeMinX = SizeX - 1;
+        activeSizeMinY = SizeY - 1;
+        activeSizeMaxX = 0;
+        activeSizeMaxY = 0;
+        
         return space;
     }
 
@@ -288,28 +284,20 @@ public class LifeGame
             }
         }
 
+        activeSizeMinX = SizeX - 1;
+        activeSizeMinY = SizeY - 1;
+        activeSizeMaxX = 0;
+        activeSizeMaxY = 0;
     }
 
     private int getNeighborCount(int posX, int posY)
     {
         int neighborCount = 0;
-//        if(posX == 0 || posY == 0 || posX == SizeX -1 || posY == SizeY -1) 
-//        {
-//            throw new java.lang.IllegalStateException("Elértük a tábla szélét!");
-//        }
 
         for (int y = posY - 1; y <= posY + 1; y++)
         {
             for (int x = posX - 1; x <= posX + 1; x++)
             {
-//                if (x != posX || y != posY)
-//                {
-//                    if (Space[x][y] == SpaceType.Live || Space[x][y] == SpaceType.Dying)
-//                    {
-//                        neighborCount++;
-//                    }
-//                }
-
                 if (Space[x][y] == SpaceType.Live || Space[x][y] == SpaceType.Dying)
                 {
                     neighborCount++;
@@ -327,37 +315,30 @@ public class LifeGame
 
     public void evaluate()
     {
+        livingCount = 0;
         for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
         {
             for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
             {
                 int neighborCount = getNeighborCount(x, y);
                 SpaceType current = Space[x][y];
-                // kihalók megkeresése
-                // if (Space[x][y] == SpaceType.Live && (neighborCount <= 1 || neighborCount >= 4))
-                if (current == SpaceType.Live && (neighborCount <= 1 || neighborCount >= 4))
+                if (current == SpaceType.Live)
                 {
-                    Space[x][y] = SpaceType.Dying;
+                    if (neighborCount <= 1 || neighborCount >= 4)
+                    {
+                        Space[x][y] = SpaceType.Dying;
+                    } else
+                    {
+                        livingCount++;
+                    }
                 } else if (current == SpaceType.Empty && neighborCount == 3)
                 {
                     Space[x][y] = SpaceType.Born;
+                    livingCount++;
                 }
             }
         }
         //DisplaySpace("kihatók megjelölve");
-
-//        for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
-//        {
-//            for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
-//            {
-//                int neighborCount = getNeighborCount(x, y);
-//                // szüleők megkeresése
-//                if (Space[x][y] == SpaceType.Empty && neighborCount == 3)
-//                {
-//                    Space[x][y] = SpaceType.Born;
-//                }
-//            }
-//        }
         //DisplaySpace("születettek megjelölése");
         for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
         {
@@ -378,30 +359,10 @@ public class LifeGame
 
             }
         }
-        //DisplaySpace("kihalás");
-
-//        for (int y = activeSizeMinY; y < activeSizeMaxY; y++)
-//        {
-//            for (int x = activeSizeMinX; x < activeSizeMaxX; x++)
-//            {
-//                //int neighborCount = getNeighborCount(x, y);
-//                // kihalók kihalása
-//                if (Space[x][y] == SpaceType.Born)
-//                {
-//                    Space[x][y] = SpaceType.Live;
-//                }
-//            }
-//        }
-        //DisplaySpace("születés");
         calculateActualSize();
-
-//        activeSizeMinX = 1;
-//        activeSizeMinY = 1;
-//        activeSizeMaxX = SizeX - 1;
-//        activeSizeMaxY = SizeY - 1;
     }
 
-    public void calculateActualSize()
+    public final void calculateActualSize()
     {
         activeSizeMinX = Math.max(1, activeSizeMinX - 1);
         activeSizeMinY = Math.max(1, activeSizeMinY - 1);
@@ -437,13 +398,6 @@ public class LifeGame
         activeSizeMinY = Math.max(1, activeSizeMinY - 1);
         activeSizeMaxX = Math.min(SizeX - 1, activeSizeMaxX + 2);
         activeSizeMaxY = Math.min(SizeY - 1, activeSizeMaxY + 2);
-
         //System.out.println("(" + activeSizeMinX + "," + activeSizeMinY + ") (" + activeSizeMaxX + "," + activeSizeMaxY + ")");
-
-//        activeSizeMinX = 1;
-//        activeSizeMinY = 1;
-//        activeSizeMaxX = SizeX - 1;
-//        activeSizeMaxY = SizeY - 1;
     }
-
 }
