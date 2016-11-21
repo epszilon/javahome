@@ -14,9 +14,9 @@ public class Program
             Instant oldTime = new Instant();
             
             
-            //LifeGame lifeGame = new LifeGame();
+            LifeGame lifeGame = new LifeGame(100, 100);
             //lifeGame.saveSpace("c:/temp/lifegame.txt");
-             LifeGame lifeGame = new LifeGame("c:/temp/lifegame.txt");
+            // LifeGame lifeGame = new LifeGame("c:/temp/lifegame.txt");
             // lifeGame.displaySpace("generation " + 0);
 
             for (int i = 0; i < 1000; i++)

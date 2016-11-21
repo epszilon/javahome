@@ -25,13 +25,13 @@ enum DisplayType
     Full
 }
 
-public class LifeGame
+public class LifeGame implements Cloneable
 {
 
     static DisplayType display = DisplayType.No;
 
-    int SizeX = 1000;
-    int SizeY = 1000;
+    int SizeX;
+    int SizeY;
 
     int activeSizeMinX;
     int activeSizeMaxX;
@@ -41,10 +41,13 @@ public class LifeGame
 
     SpaceType[][] Space;
 
-    public LifeGame()
+    public LifeGame(int sizeX, int sizeY)
     {
+        this.SizeX = sizeX;
+        this.SizeY = sizeY;
         Space = CreateNewSpace();
-        init(SizeX / 40, 2 * (SizeX / 40) * (SizeX / 40));
+        // init(SizeX / 40, 2 * (SizeX / 40) * (SizeX / 40));
+        init(4, 6);
         calculateActualSize();
     }
 
@@ -54,6 +57,19 @@ public class LifeGame
         calculateActualSize();
     }
 
+    public Object clone()
+    {
+        LifeGame clone = new LifeGame(SizeX, SizeY);
+        clone.Space = new SpaceType[SizeX][SizeY];
+        System.arraycopy(Space, 0, clone.Space, 0, Space.length);
+        clone.activeSizeMinX = activeSizeMinX;
+        clone.activeSizeMaxX = activeSizeMaxX;
+        clone.activeSizeMaxX = activeSizeMaxX;
+        clone.activeSizeMaxY = activeSizeMaxY;
+        clone.livingCount = livingCount;
+        return clone;
+    }
+
     private void init(int initRadius, int count)
     {
         int centerX = SizeX / 2;
@@ -61,12 +77,24 @@ public class LifeGame
 
         java.util.Random random = new java.util.Random();
 
-        for (int i = 0; i < (2 * initRadius * 2 * initRadius) / 2; i++)
+        for (int i = 0; i < count; i++)
         {
             Space[centerX + random.nextInt(2 * initRadius) - initRadius][centerY + random.nextInt(2 * initRadius) - initRadius] = SpaceType.Live;
         }
     }
 
+//    private void init(int initRadius, int count)
+//    {
+//        int centerX = SizeX / 2;
+//        int centerY = SizeY / 2;
+//
+//        java.util.Random random = new java.util.Random();
+//
+//        for (int i = 0; i < (2 * initRadius * 2 * initRadius) / 2; i++)
+//        {
+//            Space[centerX + random.nextInt(2 * initRadius) - initRadius][centerY + random.nextInt(2 * initRadius) - initRadius] = SpaceType.Live;
+//        }
+//    }
     public int getLivingCount()
     {
         if (livingCount == -1)
@@ -107,7 +135,8 @@ public class LifeGame
         if (activeSizeMinX > 1 && activeSizeMinY > 1 && activeSizeMaxX < SizeX - 1 && activeSizeMaxY < SizeY - 1)
         {
             return false;
-        } else
+        }
+        else
         {
             for (int y = 0; y < SizeY; y++)
             {
@@ -144,12 +173,12 @@ public class LifeGame
                 space[x][y] = SpaceType.Empty;
             }
         }
-        
+
         activeSizeMinX = SizeX - 1;
         activeSizeMinY = SizeY - 1;
         activeSizeMaxX = 0;
         activeSizeMaxY = 0;
-        
+
         return space;
     }
 
@@ -170,13 +199,16 @@ public class LifeGame
                     if (Space[x][y] == SpaceType.Live)
                     {
                         System.out.print("\u25CF");
-                    } else if (Space[x][y] == SpaceType.Dying)
+                    }
+                    else if (Space[x][y] == SpaceType.Dying)
                     {
                         System.out.print("\u25CE");
-                    } else if (Space[x][y] == SpaceType.Born)
+                    }
+                    else if (Space[x][y] == SpaceType.Born)
                     {
                         System.out.print("\u25A1");
-                    } else if (Space[x][y] == SpaceType.Empty)
+                    }
+                    else if (Space[x][y] == SpaceType.Empty)
                     {
                         System.out.print("\u25CB");
                     }
@@ -216,10 +248,12 @@ public class LifeGame
                 writer.newLine();
             }
             System.out.println();
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             e.printStackTrace();
-        } finally
+        }
+        finally
         {
             try
             {
@@ -228,7 +262,8 @@ public class LifeGame
                     // Close the writer regardless of what happens...
                     writer.close();
                 }
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
             }
         }
@@ -268,10 +303,12 @@ public class LifeGame
                     }
                 }
             }
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             e.printStackTrace();
-        } finally
+        }
+        finally
         {
             try
             {
@@ -279,7 +316,8 @@ public class LifeGame
                 {
                     reader.close();
                 }
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
             }
         }
@@ -327,11 +365,13 @@ public class LifeGame
                     if (neighborCount <= 1 || neighborCount >= 4)
                     {
                         Space[x][y] = SpaceType.Dying;
-                    } else
+                    }
+                    else
                     {
                         livingCount++;
                     }
-                } else if (current == SpaceType.Empty && neighborCount == 3)
+                }
+                else if (current == SpaceType.Empty && neighborCount == 3)
                 {
                     Space[x][y] = SpaceType.Born;
                     livingCount++;
@@ -379,14 +419,16 @@ public class LifeGame
                     if (activeSizeMinX > x)
                     {
                         activeSizeMinX = x;
-                    } else if (activeSizeMaxX < x)
+                    }
+                    else if (activeSizeMaxX < x)
                     {
                         activeSizeMaxX = x;
                     }
                     if (activeSizeMinY > y)
                     {
                         activeSizeMinY = y;
-                    } else if (activeSizeMaxY < y)
+                    }
+                    else if (activeSizeMaxY < y)
                     {
                         activeSizeMaxY = y;
                     }
@@ -400,4 +442,33 @@ public class LifeGame
         activeSizeMaxY = Math.min(SizeY - 1, activeSizeMaxY + 2);
         //System.out.println("(" + activeSizeMinX + "," + activeSizeMinY + ") (" + activeSizeMaxX + "," + activeSizeMaxY + ")");
     }
+
+//    @Override
+//    public int hashCode() 
+//    {
+//    }
+    @Override
+    public boolean equals(Object obj)
+    {
+        LifeGame lifeGame = (LifeGame) obj;
+        if (this.livingCount != lifeGame.livingCount
+                || this.activeSizeMinX != lifeGame.activeSizeMinX || this.activeSizeMinY != lifeGame.activeSizeMinY
+                || this.activeSizeMaxX != lifeGame.activeSizeMaxX || this.activeSizeMaxY != lifeGame.activeSizeMaxY)
+        {
+            return false;
+        }
+
+        for (int y = this.activeSizeMinY; y < this.activeSizeMaxY; y++)
+        {
+            for (int x = this.activeSizeMinX; x < this.activeSizeMaxX; x++)
+            {
+                if (this.Space[x][y] != lifeGame.Space[x][y])
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 }
