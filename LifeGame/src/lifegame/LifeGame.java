@@ -174,10 +174,10 @@ public class LifeGame implements Cloneable
             }
         }
 
-        activeSizeMinX = SizeX - 1;
-        activeSizeMinY = SizeY - 1;
-        activeSizeMaxX = 0;
-        activeSizeMaxY = 0;
+        activeSizeMinX = 1;
+        activeSizeMinY = 1;
+        activeSizeMaxX = SizeX - 2;
+        activeSizeMaxY = SizeY - 2;
 
         return space;
     }
@@ -322,10 +322,10 @@ public class LifeGame implements Cloneable
             }
         }
 
-        activeSizeMinX = SizeX - 1;
-        activeSizeMinY = SizeY - 1;
-        activeSizeMaxX = 0;
-        activeSizeMaxY = 0;
+        activeSizeMinX = 1;
+        activeSizeMinY = 1;
+        activeSizeMaxX = SizeX - 2;
+        activeSizeMaxY = SizeY - 2;
     }
 
     private int getNeighborCount(int posX, int posY)
@@ -409,37 +409,42 @@ public class LifeGame implements Cloneable
         activeSizeMaxX = Math.min(SizeX - 1, activeSizeMaxX + 1);
         activeSizeMaxY = Math.min(SizeY - 1, activeSizeMaxY + 1);
 
+        int newSizeMinX = SizeX - 1;
+        int newSizeMinY = SizeY - 1;
+        int newSizeMaxX = 1;
+        int newSizeMaxY = 1;
+        
         // calculate the new active area
-        for (int y = 1; y < SizeY - 1; y++)
+        for (int y = activeSizeMinY; y < activeSizeMaxY - 1; y++)
         {
-            for (int x = 1; x < SizeX - 1; x++)
+            for (int x = activeSizeMinX; x < activeSizeMaxX - 1; x++)
             {
                 if (Space[x][y] == SpaceType.Live)
                 {
-                    if (activeSizeMinX > x)
+                    if (newSizeMinX > x)
                     {
-                        activeSizeMinX = x;
+                        newSizeMinX = x;
                     }
-                    else if (activeSizeMaxX < x)
+                    else if (newSizeMaxX < x)
                     {
-                        activeSizeMaxX = x;
+                        newSizeMaxX = x;
                     }
-                    if (activeSizeMinY > y)
+                    if (newSizeMinY > y)
                     {
-                        activeSizeMinY = y;
+                        newSizeMinY = y;
                     }
-                    else if (activeSizeMaxY < y)
+                    else if (newSizeMaxY < y)
                     {
-                        activeSizeMaxY = y;
+                        newSizeMaxY = y;
                     }
                 }
             }
         }
 
-        activeSizeMinX = Math.max(1, activeSizeMinX - 1);
-        activeSizeMinY = Math.max(1, activeSizeMinY - 1);
-        activeSizeMaxX = Math.min(SizeX - 1, activeSizeMaxX + 2);
-        activeSizeMaxY = Math.min(SizeY - 1, activeSizeMaxY + 2);
+        activeSizeMinX = Math.max(1, newSizeMinX - 1);
+        activeSizeMinY = Math.max(1, newSizeMinY - 1);
+        activeSizeMaxX = Math.min(SizeX - 1, newSizeMaxX + 2);
+        activeSizeMaxY = Math.min(SizeY - 1, newSizeMaxY + 2);
         //System.out.println("(" + activeSizeMinX + "," + activeSizeMinY + ") (" + activeSizeMaxX + "," + activeSizeMaxY + ")");
     }
 
@@ -455,6 +460,7 @@ public class LifeGame implements Cloneable
                 || this.activeSizeMinX != lifeGame.activeSizeMinX || this.activeSizeMinY != lifeGame.activeSizeMinY
                 || this.activeSizeMaxX != lifeGame.activeSizeMaxX || this.activeSizeMaxY != lifeGame.activeSizeMaxY)
         {
+            //System.out.println("not equals 1" + (this.livingCount != lifeGame.livingCount));
             return false;
         }
 
@@ -464,11 +470,18 @@ public class LifeGame implements Cloneable
             {
                 if (this.Space[x][y] != lifeGame.Space[x][y])
                 {
+                    //System.out.println("not equals 2");
                     return false;
                 }
             }
         }
         return true;
+    }
+    
+    @Override 
+    public String toString() 
+    {
+        return "" + this.livingCount + " living, (" + this.activeSizeMinX + " ," +  this.activeSizeMinY + ") (" + this.activeSizeMaxX + "," + this.activeSizeMaxY + ")";
     }
 
 }

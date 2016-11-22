@@ -1,5 +1,7 @@
 package lifegame;
 
+import java.util.List;
+import java.util.ArrayList;
 import org.joda.time.Instant;
 import org.joda.time.Duration;
 
@@ -14,9 +16,13 @@ public class Program
             Instant oldTime = new Instant();
             
             
-            LifeGame lifeGame = new LifeGame(100, 100);
+            List<LifeGame> generations = new ArrayList<>();
+                    
+            
+            LifeGame lifeGame = new LifeGame(300, 300);
             //lifeGame.saveSpace("c:/temp/lifegame.txt");
             // LifeGame lifeGame = new LifeGame("c:/temp/lifegame.txt");
+            // LifeGame lifeGame = new LifeGame("c:/temp/lifegame_1000th-694.txt");
             // lifeGame.displaySpace("generation " + 0);
 
             for (int i = 0; i < 1000; i++)
@@ -35,8 +41,34 @@ public class Program
                     System.out.println("This generation is empty.");
                     break;
                 }
+                
+//                // System.out.println("generations size:" + generations.size());
+                System.out.println("current lifeGame:" + lifeGame);
+                
+                
+                boolean cycle = false;
+                for(int j = 0; j<generations.size(); j++){
+                    LifeGame lg = generations.get(j);
+                    if(lifeGame.equals(lg))
+                    {
+                        System.out.println("Repeated generation :" + j);
+                        cycle = true;
+                        break;
+                    }
+                }
+                
+                generations.add((LifeGame)lifeGame.clone());
+                
+                
+                
+                if(cycle == true){
+                    break;
+                }
+                
+                
                 // Thread.sleep(1000);
             }
+            lifeGame.saveSpace("c:/temp/lifegame_1000th-694.1000th.txt");
             
             Duration duration = new Duration(oldTime, new Instant());        
             System.out.println("duration: " + duration.getMillis() + "ms");
