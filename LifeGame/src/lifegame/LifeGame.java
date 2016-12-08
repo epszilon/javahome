@@ -22,14 +22,22 @@ enum DisplayType
     No,
     Message,
     Table,
+    ReducedTable,
     Full
 }
 
-public class LifeGame implements Cloneable
+enum GenerationState 
 {
+    Empty,
+    Healthy,
+    Oversized,
+    Repeated,
+} 
 
-    static DisplayType display = DisplayType.No;
-
+public class LifeGame // implements Cloneable
+{
+    int GenerationIndex = 0;
+    
     int SizeX;
     int SizeY;
 
@@ -41,13 +49,48 @@ public class LifeGame implements Cloneable
 
     SpaceType[][] Space;
 
+
+    public LifeGame(LifeGame lifeGame) 
+    {
+        this.SizeX = lifeGame.SizeX;
+        this.SizeY = lifeGame.SizeY;
+        // this.Space = CreateNewSpace();
+        this.Space = new SpaceType[SizeX][SizeY];
+
+        for (int y = 0; y < SizeY; y++)
+        {
+            for (int x = 0; x < SizeX; x++)
+            {
+                this.Space [x][y] = lifeGame.Space[x][y];
+            }
+        }
+       
+        
+        // System.arraycopy(lifeGame.Space, 0, this.Space, 0, lifeGame.Space.length);
+        // System.arraycopy(lifeGame.Space, 0, this.Space, 0, lifeGame.Space.length);
+        
+        
+        this.GenerationIndex = lifeGame.GenerationIndex;
+        this.activeSizeMinX = lifeGame.activeSizeMinX;
+        this.activeSizeMinY = lifeGame.activeSizeMinY;
+        this.activeSizeMaxX = lifeGame.activeSizeMaxX;
+        this.activeSizeMaxY = lifeGame.activeSizeMaxY;
+        this.livingCount = lifeGame.livingCount;
+        
+        //displaySpace("from the copy constructor", DisplayType.ReducedTable);
+        
+    }
+    
+    
+    
     public LifeGame(int sizeX, int sizeY)
     {
         this.SizeX = sizeX;
         this.SizeY = sizeY;
+        this.GenerationIndex = 0;
         Space = CreateNewSpace();
         // init(SizeX / 40, 2 * (SizeX / 40) * (SizeX / 40));
-        init(4, 6);
+        init(3, 5);
         calculateActualSize();
     }
 
@@ -55,46 +98,65 @@ public class LifeGame implements Cloneable
     {
         readSpace(filePath);
         calculateActualSize();
+        this.GenerationIndex = 0;
     }
 
-    public Object clone()
-    {
-        LifeGame clone = new LifeGame(SizeX, SizeY);
-        clone.Space = new SpaceType[SizeX][SizeY];
-        System.arraycopy(Space, 0, clone.Space, 0, Space.length);
-        clone.activeSizeMinX = activeSizeMinX;
-        clone.activeSizeMaxX = activeSizeMaxX;
-        clone.activeSizeMaxX = activeSizeMaxX;
-        clone.activeSizeMaxY = activeSizeMaxY;
-        clone.livingCount = livingCount;
-        return clone;
-    }
+//    public Object clone()
+//    {
+//        LifeGame clone = new LifeGame(this);
+//        displaySpace("from the clone()", DisplayType.ReducedTable);
+//        return clone;
+//    }
 
-    private void init(int initRadius, int count)
+    private void init(int initWidth, int count)
     {
         int centerX = SizeX / 2;
         int centerY = SizeY / 2;
 
         java.util.Random random = new java.util.Random();
 
+//        Space[centerX-1][centerY] = SpaceType.Live;
+//        Space[centerX][centerY] = SpaceType.Live;
+//        Space[centerX+1][centerY] = SpaceType.Live;
+//
+//        Space[centerX-1][centerY+6] = SpaceType.Live;
+//        Space[centerX][centerY+6] = SpaceType.Live;
+//        Space[centerX+1][centerY+6] = SpaceType.Live;
+//
+//
+//        Space[centerX+3][centerY-1+3] = SpaceType.Live;
+//        Space[centerX+3][centerY+3] = SpaceType.Live;
+//        Space[centerX+3][centerY+1+3] = SpaceType.Live;
+//
+//        Space[centerX-3][centerY-1+3] = SpaceType.Live;
+//        Space[centerX-3][centerY+3] = SpaceType.Live;
+//        Space[centerX-3][centerY+1+3] = SpaceType.Live;
+
+
+
+//        Space[centerX-1][centerY+0] = SpaceType.Live;
+//        Space[centerX-1][centerY+1] = SpaceType.Live;
+//        Space[centerX+1][centerY+0] = SpaceType.Live;
+//        Space[centerX+1][centerY+1] = SpaceType.Live;
+//        Space[centerX+0][centerY-1] = SpaceType.Live;
+//        Space[centerX+0][centerY+2] = SpaceType.Live;
+
+
+
+
+        
         for (int i = 0; i < count; i++)
         {
-            Space[centerX + random.nextInt(2 * initRadius) - initRadius][centerY + random.nextInt(2 * initRadius) - initRadius] = SpaceType.Live;
+            Space[centerX + random.nextInt(initWidth) - initWidth/2][centerY + random.nextInt(initWidth) - initWidth/2] = SpaceType.Live;
         }
+        
+        activeSizeMinX = 0;
+        activeSizeMinY = 0;
+        activeSizeMaxX = SizeX - 1;
+        activeSizeMaxY = SizeY - 1;
+        
     }
 
-//    private void init(int initRadius, int count)
-//    {
-//        int centerX = SizeX / 2;
-//        int centerY = SizeY / 2;
-//
-//        java.util.Random random = new java.util.Random();
-//
-//        for (int i = 0; i < (2 * initRadius * 2 * initRadius) / 2; i++)
-//        {
-//            Space[centerX + random.nextInt(2 * initRadius) - initRadius][centerY + random.nextInt(2 * initRadius) - initRadius] = SpaceType.Live;
-//        }
-//    }
     public int getLivingCount()
     {
         if (livingCount == -1)
@@ -182,35 +244,49 @@ public class LifeGame implements Cloneable
         return space;
     }
 
-    public void displaySpace(String message)
+    public void displaySpace(String message, DisplayType display)
     {
-        if (display == DisplayType.Message || display == DisplayType.Full)
+        if (message != null && message.length() > 0 && display != DisplayType.No)
         {
             System.out.println(message);
         }
-
-        if (display == DisplayType.Full)
+        
+        
+        if (display == DisplayType.Full || display == DisplayType.ReducedTable)
         {
-
-            for (int y = 0; y < SizeY; y++)
+            int startX = 0;
+            int startY = 0;
+            int endX = SizeX;
+            int endY = SizeY;
+            if(display ==  DisplayType.ReducedTable) 
             {
-                for (int x = 0; x < SizeX; x++)
+                startX = activeSizeMinX;
+                startY = activeSizeMinY;
+                endX = activeSizeMaxX;
+                endY = activeSizeMaxY;
+            }
+            
+            for (int y = startY; y < endY; y++)
+            {
+                for (int x = startX; x < endX; x++)
                 {
-                    if (Space[x][y] == SpaceType.Live)
+                    switch(Space[x][y])
                     {
+                        case Live:
                         System.out.print("\u25CF");
-                    }
-                    else if (Space[x][y] == SpaceType.Dying)
-                    {
+                        break;
+                        case Dying:
                         System.out.print("\u25CE");
-                    }
-                    else if (Space[x][y] == SpaceType.Born)
-                    {
+                        break;
+                        case Born:
                         System.out.print("\u25A1");
-                    }
-                    else if (Space[x][y] == SpaceType.Empty)
-                    {
+                        break;
+                        case Empty:
                         System.out.print("\u25CB");
+                        break;
+                        default:
+                        System.out.print("?");
+                        break;
                     }
                 }
                 System.out.println();
@@ -400,6 +476,7 @@ public class LifeGame implements Cloneable
             }
         }
         calculateActualSize();
+        this.GenerationIndex++;
     }
 
     public final void calculateActualSize()
@@ -445,13 +522,9 @@ public class LifeGame implements Cloneable
         activeSizeMinY = Math.max(1, newSizeMinY - 1);
         activeSizeMaxX = Math.min(SizeX - 1, newSizeMaxX + 2);
         activeSizeMaxY = Math.min(SizeY - 1, newSizeMaxY + 2);
-        //System.out.println("(" + activeSizeMinX + "," + activeSizeMinY + ") (" + activeSizeMaxX + "," + activeSizeMaxY + ")");
+        // System.out.println("calculate (" + activeSizeMinX + "," + activeSizeMinY + ") (" + activeSizeMaxX + "," + activeSizeMaxY + ")");
     }
 
-//    @Override
-//    public int hashCode() 
-//    {
-//    }
     @Override
     public boolean equals(Object obj)
     {
@@ -470,7 +543,6 @@ public class LifeGame implements Cloneable
             {
                 if (this.Space[x][y] != lifeGame.Space[x][y])
                 {
-                    //System.out.println("not equals 2");
                     return false;
                 }
             }
@@ -481,7 +553,7 @@ public class LifeGame implements Cloneable
     @Override 
     public String toString() 
     {
-        return "" + this.livingCount + " living, (" + this.activeSizeMinX + " ," +  this.activeSizeMinY + ") (" + this.activeSizeMaxX + "," + this.activeSizeMaxY + ")";
+        return "generation:" + this.GenerationIndex + " living:" + this.livingCount + " active area:((" + this.activeSizeMinX + " ," +  this.activeSizeMinY + "),(" + this.activeSizeMaxX + "," + this.activeSizeMaxY + "))";
     }
 
 }
